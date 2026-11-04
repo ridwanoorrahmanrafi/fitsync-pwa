@@ -1,0 +1,37 @@
+FITSYNC PWA — AUDIT / RESUME FILE
+Last updated: 2026-11-04
+
+SOURCE OF TRUTH: "Antigravity" execution plan & FRS specification.
+- Database: MongoDB Atlas live cluster (cluster0.mttlbps.mongodb.net/fitsync).
+- Authentication: Firebase Auth configured (`fitness-fcc99`) with Google OAuth popup & dev fallback.
+- AI Engine: Google Gemini API (gemini-3.5-flash with automated multi-model failover) for AI nutrition estimation, pantry recipe generation, and balance boost coaching.
+- Notifications: In-App Balance Boost card & interactive timer + PWA Web Push notifications (SMTP email disabled per user request).
+- Design: Fully responsive website across all devices (Mobile 375px/390px, Tablet 768px/820px, Laptop 1024px, Desktop 1440px/1920px).
+- Navigation: Desktop sticky glassmorphic Top Navbar (`Navbar.jsx`) + Mobile ergonomic Bottom Nav (`BottomNav.jsx` with `md:hidden`).
+- Layouts: Fluid container `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8` with adaptive multi-column grids.
+- Surplus threshold = +150 to +200 kcal (configurable via env SURPLUS_THRESHOLD, defaults to 150).
+- Region field = preferences.countryRegion (supports South_Asia, Middle_East, East_Asia, Western, Europe, North_America, Latin_America, Africa, Global).
+- Equipment enum: none_home / bodyweight | dumbbells | resistance_bands | full_gym (none_home is always included).
+- DailyLog: date = "YYYY-MM-DD", tracks caloriesConsumed/totalCalories, meals/mealsEaten, caloriesBurned, burnTask & extraBurnTasks.
+- State management: Zustand store (WorkoutPlayerStore) with PREPARE (10s) -> WORK -> REST state machine, +15s rest, pause, and next controls.
+
+STACK:
+- Client: React 18 + Vite + Tailwind CSS + Zustand + TanStack Query + Recharts + Lottie-React + Lucide-React + vite-plugin-pwa + Firebase Client SDK.
+- Server: Node 20 (ESM) + Express + Mongoose + Zod + node-cron + Firebase-Admin + Google Gemini API.
+
+== VERIFICATION STATUS ==
+PHASE 1 Scaffolding + Seed: DONE. Live connected to MongoDB Atlas. 30 Exercises + 40 Cultural Foods seeded.
+PHASE 2 Backend API & Math Engines: DONE. 17/17 Jest unit tests passing.
+PHASE 3 Frontend Shell & Onboarding: DONE. 5-step responsive wizard (`max-w-2xl mx-auto`) with adaptive grid inputs and visual step indicators.
+PHASE 4 Player, Diet & Calorie Balance: DONE. Studio 2-column gym workout view on desktop/tablet; 4-column responsive meal plan grid with pantry manager & Gemini AI.
+PHASE 5 Progress & PWA: DONE. 4-column KPI cards, side-by-side Recharts (Weight Trend + Calorie Adherence), 35-day streak calendar, service worker caching (dist/sw.js generated), manifest.
+PHASE 6 Gemini AI Integration: DONE. `/ai/estimate-food`, `/ai/pantry-recipe`, `/ai/balance-advice` live; FoodLogger equipped with "✨ AI Estimate" button.
+PHASE 7 Responsive Across All Devices: DONE. Desktop top header, hidden mobile bottom nav on desktop, responsive container layouts, 100% build pass.
+PHASE 8 Firebase Project Integration: DONE. Firebase client config for project `fitness-fcc99` added to client `.env`, AuthContext wired with Google OAuth provider.
+PHASE 9 Cleaned Configuration: DONE. SMTP email disabled; notification pipeline streamlined to in-app Balance Boost timer and PWA push.
+
+== ALL TESTS & BUILDS PASS ==
+1. Database Seeder: `npm run seed --workspace=server` -> Successfully seeded 30 exercises and 40 foods to MongoDB Atlas.
+2. Server tests: `npm test tests/unit.test.js --workspace=server` -> 17 passed, 17 total (100% PASS).
+3. Client build: `npm run build --workspace=client` -> Vite production build + PWA precache (100% PASS, 2239 modules transformed, dist/sw.js generated).
+4. Gemini AI live test: Verified with live estimation ("Grilled Chicken Shawarma Plate" -> 720 kcal, 48g P, 65g C, 28g F).

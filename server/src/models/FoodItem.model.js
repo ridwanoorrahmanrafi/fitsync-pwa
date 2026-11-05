@@ -78,7 +78,7 @@ foodItemSchema.pre('insertMany', function (next, docs) {
   next();
 });
 
-foodItemSchema.index({ regions: 1, dietaryTags: 1, mealTypes: 1 });
-foodItemSchema.index({ region: 1, dietaryTags: 1 });
+foodItemSchema.index({ mealTypes: 1 });
+foodItemSchema.index({ pantryKeywords: 1 });
 
 export default mongoose.model('FoodItem', foodItemSchema);

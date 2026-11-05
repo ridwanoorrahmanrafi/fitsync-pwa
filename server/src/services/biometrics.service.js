@@ -21,10 +21,12 @@ export function calcBMR({ gender, weightKg, heightCm, age }) {
   return gender === 'male' ? base + 5 : base - 161;
 }
 
-/** TDEE = BMR × activity multiplier based on workout days/week */
-export function calcTDEE(bmr, workoutDays) {
-  const days = workoutDays.length;
-  const multiplier = days <= 2 ? 1.35 : days <= 4 ? 1.5 : 1.7;
+/** TDEE = BMR × activity multiplier based on current workout days/week (0 -> 1.2, 1-2 -> 1.35, 3-4 -> 1.5, 5-7 -> 1.7) */
+export function calcTDEE(bmr, workoutDaysOrCount = 3) {
+  const days = Array.isArray(workoutDaysOrCount)
+    ? workoutDaysOrCount.length
+    : (Number(workoutDaysOrCount) || 0);
+  const multiplier = days === 0 ? 1.2 : days <= 2 ? 1.35 : days <= 4 ? 1.5 : 1.7;
   return Math.round(bmr * multiplier);
 }
 
@@ -51,7 +53,8 @@ export function calcMacros(calorieTarget) {
 export function computeTargets(userData) {
   const { bmi, category: bmiCategory } = calcBMI(userData.weightKg, userData.heightCm);
   const bmr = calcBMR(userData);
-  const tdee = calcTDEE(bmr, userData.workoutDays);
+  const activityDays = userData.activityDaysPerWeek !== undefined ? userData.activityDaysPerWeek : userData.workoutDays;
+  const tdee = calcTDEE(bmr, activityDays);
   const calorieTarget = calcCalorieTarget(tdee, userData.goal, userData.gender);
   const macros = calcMacros(calorieTarget);
   return { bmi, bmiCategory, bmr: Math.round(bmr), tdee, calorieTarget, ...macros };

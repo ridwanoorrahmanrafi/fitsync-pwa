@@ -7,7 +7,7 @@ import { useWakeLock } from '../hooks/useWakeLock.js';
 import { useBeep } from '../hooks/useBeep.js';
 import { useWorkoutPlayerStore } from '../context/WorkoutPlayerStore.js';
 import { CheckCircle2, Dumbbell, Play, Pause, SkipForward, PlusCircle, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 
 const DAY_MAP = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -87,8 +87,7 @@ export default function WorkoutSession() {
   }
 
   if (!user?.onboarded) {
-    navigate('/onboarding', { replace: true });
-    return null;
+    return <Navigate to="/onboarding" replace />;
   }
 
   if (!todayDay || !todayDay.exercises || todayDay.exercises.length === 0) {

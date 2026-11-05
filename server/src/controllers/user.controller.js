@@ -11,13 +11,26 @@ export async function onboard(req, res) {
     const {
       name, age, gender, heightCm, weightKg, targetWeightKg,
       goal, fitnessLevel, equipment, workoutDays, sessionDurationMins,
+      activityDaysPerWeek, religion, extraRules = [], typicalFoods = [],
       countryRegion, country, religionDietary = [], pantryInventory = [],
     } = req.body;
 
     const normalizedRegion = countryRegion || country || 'Western';
     const normalizedEquipment = equipment.map((eq) => (eq === 'bodyweight' ? 'none_home' : eq));
 
-    const targets = computeTargets({ age, gender, heightCm, weightKg, workoutDays, goal });
+    // Religion implies dietary tags, merged on the server with user choices:
+    // Islam -> Halal; Judaism -> Kosher; Hinduism -> Hindu_No_Beef; Jainism -> Jain + Vegetarian
+    const RELIGION_TAGS = {
+      Islam: ['Halal'],
+      Judaism: ['Kosher'],
+      Hinduism: ['Hindu_No_Beef'],
+      Jainism: ['Jain', 'Vegetarian'],
+    };
+    const implied = (religion && RELIGION_TAGS[religion]) ? RELIGION_TAGS[religion] : [];
+    const mergedDietary = Array.from(new Set([...religionDietary, ...extraRules, ...implied]));
+
+    const activityDays = activityDaysPerWeek !== undefined ? activityDaysPerWeek : workoutDays;
+    const targets = computeTargets({ age, gender, heightCm, weightKg, workoutDays: activityDays, goal });
 
     const user = await User.findOneAndUpdate(
       { firebaseUid: req.uid },
@@ -42,8 +55,12 @@ export async function onboard(req, res) {
             equipment: normalizedEquipment,
             workoutDays,
             sessionDurationMins,
+            activityDaysPerWeek: activityDaysPerWeek !== undefined ? activityDaysPerWeek : workoutDays.length,
+            country: country || '',
+            religion: religion || 'None',
             countryRegion: normalizedRegion,
-            religionDietary,
+            typicalFoods,
+            religionDietary: mergedDietary,
             pantryInventory,
           },
           biometrics: {

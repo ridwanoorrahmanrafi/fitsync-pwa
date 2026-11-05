@@ -20,21 +20,30 @@ function buildPortionDescription(multiplier, food) {
   return `~${grams}g of ${food.name}`;
 }
 
-function selectBestFood(candidates, targetCalories, pantrySet) {
+function selectBestFood(candidates, targetCalories, pantrySet, typicalSet = new Set()) {
   if (!candidates.length) return null;
 
-  // Score: pantry match count * 10 + calorie closeness
+  // Score = pantry matches x 10 + familiar daily-food matches x 4 (max 3) - |portion multiplier - 1| x 4 + small random tie-break
   const scored = candidates.map((food) => {
-    const calories = food.nutrition?.calories || food.calories || food.caloriesPer100g || 100;
-    const diff = Math.abs(calories - targetCalories);
+    const baseCal = food.nutrition?.calories || food.calories || food.caloriesPer100g || 100;
+    const rawMultiplier = targetCalories / baseCal;
+    const portionMultiplier = Math.round(Math.min(3.0, Math.max(0.5, rawMultiplier)) * 10) / 10;
+
     const keywords = (food.pantryKeywords || food.keywords || []).map((k) => k.toLowerCase());
-    const pantryMatchCount = keywords.filter((kw) => pantrySet.has(kw)).length;
-    const pantryScore = pantryMatchCount * 100;
-    return { food, score: pantryScore - diff };
+    const pantryMatches = keywords.filter((kw) => pantrySet.has(kw)).length + (pantrySet.has(food.name.toLowerCase()) ? 1 : 0);
+    const familiarMatches = Math.min(3, keywords.filter((kw) => typicalSet.has(kw)).length + (typicalSet.has(food.name.toLowerCase()) ? 1 : 0));
+
+    const score =
+      (pantryMatches * 10) +
+      (familiarMatches * 4) -
+      (Math.abs(portionMultiplier - 1) * 4) +
+      (Math.random() * 0.1);
+
+    return { food, score, portionMultiplier };
   });
 
   scored.sort((a, b) => b.score - a.score);
-  return scored[0].food;
+  return scored[0];
 }
 
 export async function generateDietPlan(user) {
@@ -59,8 +68,14 @@ export async function generateDietPlan(user) {
     user.pantryInventory ||
     [];
 
+  const typicalFoods =
+    user.preferences?.typicalFoods ||
+    user.typicalFoods ||
+    [];
+
   const userId = user._id;
   const pantrySet = new Set(pantryInventory.map((s) => s.toLowerCase()));
+  const typicalSet = new Set(typicalFoods.map((s) => s.toLowerCase()));
 
   // Active tags, omitting 'None'
   const activeTags = religionDietary.filter((t) => t && t !== 'None');
@@ -89,14 +104,14 @@ export async function generateDietPlan(user) {
       continue;
     }
 
-    const food = selectBestFood(candidates, slotCalories, pantrySet);
+    const match = selectBestFood(candidates, slotCalories, pantrySet, typicalSet);
+    if (!match) continue;
+    const { food, portionMultiplier: multiplier } = match;
+
     const baseCal = food.nutrition?.calories || food.calories || food.caloriesPer100g || 100;
     const baseP = food.nutrition?.proteinG ?? food.proteinG ?? 0;
     const baseC = food.nutrition?.carbsG ?? food.carbsG ?? 0;
     const baseF = food.nutrition?.fatsG ?? food.fatsG ?? 0;
-
-    const rawMultiplier = slotCalories / baseCal;
-    const multiplier = Math.min(3.0, Math.max(0.5, rawMultiplier));
 
     const keywords = (food.pantryKeywords || food.keywords || []).map((k) => k.toLowerCase());
     const isPantry = keywords.some((k) => pantrySet.has(k)) || pantrySet.has(food.name.toLowerCase());
@@ -143,7 +158,13 @@ export async function swapMeal(user, mealType, excludeName) {
     user.pantryInventory ||
     [];
 
+  const typicalFoods =
+    user.preferences?.typicalFoods ||
+    user.typicalFoods ||
+    [];
+
   const pantrySet = new Set(pantryInventory.map((s) => s.toLowerCase()));
+  const typicalSet = new Set(typicalFoods.map((s) => s.toLowerCase()));
   const activeTags = religionDietary.filter((t) => t && t !== 'None');
   const slotCalories = Math.round(calorieTarget * MEAL_SPLIT[mealType]);
 
@@ -160,14 +181,14 @@ export async function swapMeal(user, mealType, excludeName) {
   const candidates = await FoodItem.find(query).lean();
   if (!candidates.length) return null;
 
-  const food = selectBestFood(candidates, slotCalories, pantrySet);
+  const match = selectBestFood(candidates, slotCalories, pantrySet, typicalSet);
+  if (!match) return null;
+  const { food, portionMultiplier: multiplier } = match;
+
   const baseCal = food.nutrition?.calories || food.calories || food.caloriesPer100g || 100;
   const baseP = food.nutrition?.proteinG ?? food.proteinG ?? 0;
   const baseC = food.nutrition?.carbsG ?? food.carbsG ?? 0;
   const baseF = food.nutrition?.fatsG ?? food.fatsG ?? 0;
-
-  const rawMultiplier = slotCalories / baseCal;
-  const multiplier = Math.min(3.0, Math.max(0.5, rawMultiplier));
 
   const keywords = (food.pantryKeywords || food.keywords || []).map((k) => k.toLowerCase());
   const isPantry = keywords.some((k) => pantrySet.has(k)) || pantrySet.has(food.name.toLowerCase());

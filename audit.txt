@@ -33,13 +33,19 @@ PHASE 9 Cleaned Configuration: DONE. SMTP email disabled; notification pipeline 
 PHASE 10 Git Repository & GitHub Push: DONE. Clean git repository initialized, `.env` files safely excluded, and pushed to `https://github.com/ridwanoorrahmanrafi/fitsync-pwa`.
 PHASE 11 Full End-to-End Suite & DB Index Resolution: DONE. Fixed MongoDB parallel multikey array indexes; 100% of integration and unit tests passing (28/28).
 PHASE 12 Project Plan Validation, CI/CD, E2E & Compliance: DONE. Added GitHub Actions CI pipeline (.github/workflows/ci.yml with mongo:6.0 service), PR checklist, Playwright critical path E2E tests (6/6 passing), Medical Disclaimer footer notice (Section 10), and GDPR account erasure endpoint.
+PHASE 13 Dashboard Spinner Resolution, 6-Step Onboarding & Master Spec Compliance: DONE.
+- Resolved infinite spinner on /dashboard caused by CORP/CORS blocking and hanging Axios interceptors: switched client to relative /api/v1 proxied by Vite, added 10s Axios timeout, wrapped Firebase getIdToken with a 2.5s Promise.race timeout, configured Helmet with crossOriginResourcePolicy: "cross-origin", and replaced render-phase navigate() calls with React Router <Navigate to="/onboarding" replace />.
+- Upgraded Onboarding to full 6-Step Wizard matching Master Specification (About You, Current Activity 0-7 days, Workout Plan & Session Length, Origin & Religion with auto-mapped country dropdown, Daily Foods, Kitchen Pantry) + Post-Submit Biometric Baseline Results View (BMI badge, BMR, TDEE, Calorie Target, and "See My Plan" button).
+- Implemented TDEE 0-day multiplier (1.2) in biometrics.service.js, server-side religion dietary tag implication (Islam -> Halal, Judaism -> Kosher, Hinduism -> Hindu_No_Beef, Jainism -> Jain + Vegetarian), and exact diet generator scoring formula incorporating typical foods.
+- Updated layout container max width to max-w-4xl and typography to Barlow Condensed + Barlow.
+- Verification: 100% tests passing (18/18 unit, 5/5 seed-coverage, 11/11 integration, 7/7 Playwright E2E).
 
 == ALL TESTS & BUILDS PASS ==
-1. Database Seeder: `npm run seed --workspace=server` -> Successfully seeded 30 exercises and 40 foods to MongoDB Atlas.
-2. Server unit tests: `npm test tests/unit.test.js --workspace=server` -> 17 passed, 17 total (100% PASS).
-3. Server integration tests: `npm test tests/integration.test.js --workspace=server` -> 11 passed, 11 total (100% PASS).
-4. Playwright E2E tests: `npx playwright test` -> 6 passed, 6 total (100% PASS).
-5. Complete test suite: 34 tests passed, 34 total across all test layers (100% PASS).
-6. Client build: `npm run build --workspace=client` -> Vite production build + PWA precache (100% PASS, 2239 modules transformed, dist/sw.js generated).
-7. GitHub Actions CI: .github/workflows/ci.yml automated pipeline configured for pushes and pull requests.
+1. Database Seeder: `npm run seed --workspace=server` -> Successfully seeded 58 exercises and 65 foods to MongoDB Atlas.
+2. Server unit tests: `npm test tests/unit.test.js --workspace=server` -> 18 passed, 18 total (100% PASS).
+3. Seed coverage test: `npm test tests/seed-coverage.test.js --workspace=server` -> 5 passed, 5 total (100% PASS).
+4. Server integration tests: `npm test tests/integration.test.js --workspace=server` -> 11 passed, 11 total (100% PASS).
+5. Playwright E2E tests: `npx playwright test` -> 7 passed, 7 total (100% PASS).
+6. Complete test suite: 41 tests passed, 41 total across all test layers (100% PASS).
+7. Client build: `npm run build --workspace=client` -> Vite production build (100% PASS, 2239 modules transformed, dist/sw.js generated).
 8. GitHub Repository: https://github.com/ridwanoorrahmanrafi/fitsync-pwa (main branch up to date).

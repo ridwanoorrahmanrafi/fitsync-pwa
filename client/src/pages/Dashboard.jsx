@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { getMe, getTodayLog, getWorkoutToday, logWeight, updateBurnTask } from '../api/client.js';
 import CalorieRing from '../components/nutrition/CalorieRing.jsx';
 import WaterTracker from '../components/nutrition/WaterTracker.jsx';
@@ -79,15 +79,42 @@ export default function Dashboard() {
 
   if (isUserLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
         <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-slate-400">Loading your personalized dashboard…</p>
       </div>
     );
   }
 
-  if (isUserError || !user?.onboarded) {
-    navigate('/onboarding', { replace: true });
-    return null;
+  if (isUserError) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 max-w-md w-full space-y-3">
+          <p className="text-base font-bold text-white">Connecting to FitSync Server</p>
+          <p className="text-xs text-slate-400">
+            Could not fetch profile data. Please verify your connection or refresh the page.
+          </p>
+          <div className="flex gap-2 justify-center pt-2">
+            <button
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['user'] })}
+              className="btn-primary text-xs px-4 py-2"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => navigate('/onboarding')}
+              className="btn-outline text-xs px-4 py-2"
+            >
+              Go to Setup
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user?.onboarded) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   const consumed = log?.totalCalories || 0;

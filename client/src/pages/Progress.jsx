@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { getProgress, getMe } from '../api/client.js';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
@@ -76,8 +76,7 @@ export default function Progress() {
   }
 
   if (!user?.onboarded) {
-    navigate('/onboarding', { replace: true });
-    return null;
+    return <Navigate to="/onboarding" replace />;
   }
 
   const calorieData = logs.map((l) => ({ date: l.date.slice(5), kcal: l.totalCalories, target: user?.calorieTarget }));

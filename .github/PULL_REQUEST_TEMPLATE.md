@@ -11,3 +11,4 @@
 - [ ] **Dietary Rules Integrity**: Confirmed that dietary filters (Halal, Kosher, Vegetarian, Vegan, Jain, etc.) strictly exclude forbidden tags.
 - [ ] **Calorie Target Floors**: Men $\ge 1,500$ kcal, Women $\ge 1,200$ kcal, Surplus burn task capped at 45 minutes.
 - [ ] **OWASP & Secret Protection**: No API keys, passwords, or Atlas credentials committed in tracked files.
+

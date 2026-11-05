@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Navigate } from 'react-router-dom';
 import { getDietPlan, swapMeal, getMe, updatePantry, generateDiet } from '../api/client.js';
 import FoodLogger from '../components/nutrition/FoodLogger.jsx';
 import { RefreshCw, Leaf, Plus, Sparkles, ChevronDown, ChevronUp, Globe2, ShieldCheck, Flame } from 'lucide-react';
@@ -143,6 +144,10 @@ export default function DietPlanPage() {
         <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  if (!user?.onboarded) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   const meals = plan?.meals || {};

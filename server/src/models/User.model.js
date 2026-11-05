@@ -29,8 +29,12 @@ const userSchema = new mongoose.Schema(
       sessionDurationMins: { type: Number, default: 45 },
       countryRegion: {
         type: String,
-        enum: ['South_Asia', 'Middle_East', 'East_Asia', 'Europe', 'North_America', 'Western', 'Latin_America', 'Africa'],
+        enum: ['South_Asia', 'Middle_East', 'East_Asia', 'Europe', 'North_America', 'Western', 'Latin_America', 'Africa', 'Global'],
       },
+      country: String,
+      religion: String,
+      activityDaysPerWeek: Number,
+      typicalFoods: [String],
       religionDietary: [String],
       pantryInventory: [String],
     },

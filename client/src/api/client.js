@@ -1,20 +1,28 @@
 import axios from 'axios';
+import { auth, firebaseConfigured } from '../config/firebase.config.js';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
-export const api = axios.create({ baseURL: BASE_URL });
+export const api = axios.create({
+  baseURL: BASE_URL,
+  timeout: 10000,
+});
 
-// Attach Firebase ID token (or dev token) to every request
+// Attach Firebase ID token to every request with timeout protection
 api.interceptors.request.use(async (config) => {
   try {
-    const { auth, firebaseConfigured } = await import('../config/firebase.config.js');
     if (firebaseConfigured && auth?.currentUser) {
-      const token = await auth.currentUser.getIdToken();
-      config.headers.Authorization = `Bearer ${token}`;
+      const token = await Promise.race([
+        auth.currentUser.getIdToken(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Auth token timeout')), 2500)),
+      ]);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
-    // Dev bypass: server accepts any token or none when DEV_AUTH_BYPASS=true
-  } catch {
-    // Silently skip — server handles missing token
+  } catch (err) {
+    // Graceful fallback — in local bypass mode, server handles requests even without header
+    console.warn('[API Interceptor] Token retrieval skipped:', err.message);
   }
   return config;
 });
@@ -22,7 +30,7 @@ api.interceptors.request.use(async (config) => {
 // Convenience wrappers
 export const getMe = () => api.get('/users/me').then((r) => r.data.user);
 export const deleteAccount = () => api.delete('/users/me').then((r) => r.data);
-export const onboard = (data) => api.post('/users/onboard', data).then((r) => r.data.user);
+export const onboard = (data) => api.post('/users/onboard', data).then((r) => r.data);
 export const getWorkoutPlan = () => api.get('/workouts/plan').then((r) => r.data.plan);
 export const getWorkoutToday = (day) => api.get(`/workouts/today?day=${day}`).then((r) => r.data.day);
 export const completeWorkout = () => api.post('/workouts/complete').then((r) => r.data);
@@ -44,4 +52,3 @@ export const updateFcmToken = (fcmToken) => api.patch('/users/me/fcm-token', { f
 export const estimateFoodAI = (foodName, portion) => api.post('/ai/estimate-food', { foodName, portion }).then((r) => r.data.data);
 export const generatePantryRecipeAI = (mealType, targetCalories) => api.post('/ai/pantry-recipe', { mealType, targetCalories }).then((r) => r.data.data);
 export const getBalanceAdviceAI = (surplusKcal, exerciseName, durationMins) => api.post('/ai/balance-advice', { surplusKcal, exerciseName, durationMins }).then((r) => r.data.data);
-

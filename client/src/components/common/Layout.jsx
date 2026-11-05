@@ -10,7 +10,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col relative antialiased selection:bg-brand-500/30 selection:text-brand-300">
       <Navbar user={user} />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 md:py-8 pb-24 md:pb-12">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-3 sm:px-6 py-4 md:py-8 pb-24 md:pb-12">
         <Outlet />
       </main>
 

@@ -19,7 +19,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['"Barlow Condensed"', 'sans-serif'],
+        sans: ['Barlow', 'Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

@@ -35,6 +35,10 @@ export const onboardSchema = z.object({
     ])
     .optional(),
   country: z.string().optional(),
+  religion: z.string().optional(),
+  activityDaysPerWeek: z.number().min(0).max(7).optional(),
+  extraRules: z.array(z.string()).optional(),
+  typicalFoods: z.array(z.string()).default([]),
   religionDietary: z.array(z.string()).default([]),
   pantryInventory: z.array(z.string()).default([]),
 });

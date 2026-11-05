@@ -37,6 +37,12 @@ test('BMR female: Mifflin-St Jeor reference values', () => {
 
 // ── TDEE ─────────────────────────────────────────────────────────────────────
 
+test('TDEE multiplier 1.2 for 0 days (sedentary baseline)', () => {
+  const bmr = 1600;
+  expect(calcTDEE(bmr, 0)).toBe(Math.round(bmr * 1.2));
+  expect(calcTDEE(bmr, [])).toBe(Math.round(bmr * 1.2));
+});
+
 test('TDEE multiplier 1.35 for 1–2 days', () => {
   const bmr = 1600;
   expect(calcTDEE(bmr, ['Mon'])).toBe(Math.round(bmr * 1.35));

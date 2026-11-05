@@ -83,8 +83,12 @@ export default function DietPlanPage() {
   const [showPantryDrawer, setShowPantryDrawer] = useState(true);
   const [customPantryItem, setCustomPantryItem] = useState('');
 
-  const { data: plan, isLoading } = useQuery({ queryKey: ['diet-plan'], queryFn: getDietPlan });
-  const { data: user } = useQuery({ queryKey: ['user'], queryFn: getMe });
+  const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ['user'], queryFn: getMe });
+  const { data: plan, isLoading: isPlanLoading } = useQuery({
+    queryKey: ['diet-plan'],
+    queryFn: getDietPlan,
+    enabled: !!user?.onboarded,
+  });
 
   const swapMutation = useMutation({
     mutationFn: swapMeal,
@@ -133,7 +137,7 @@ export default function DietPlanPage() {
     setCustomPantryItem('');
   };
 
-  if (isLoading) {
+  if (isUserLoading || (user?.onboarded && isPlanLoading)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />

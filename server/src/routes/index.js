@@ -24,7 +24,7 @@ router.use(verifyToken);
 
 // ── Users ──────────────────────────────────────────────────────────────────
 router.post('/users/onboard', validateSchema(onboardSchema), userCtrl.onboard);
-router.get('/users/me', requireOnboarded, userCtrl.getMe);
+router.get('/users/me', userCtrl.getMe);
 router.patch('/users/me/fcm-token', validateSchema(fcmTokenSchema), userCtrl.updateFcmToken);
 
 // ── Workouts ───────────────────────────────────────────────────────────────

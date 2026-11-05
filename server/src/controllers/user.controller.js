@@ -88,7 +88,16 @@ export async function onboard(req, res) {
 
 export async function getMe(req, res) {
   try {
-    if (!req.user) return res.status(404).json({ error: 'User not found' });
+    if (!req.user) {
+      return res.json({
+        user: {
+          firebaseUid: req.uid,
+          email: `${req.uid}@dev.local`,
+          name: '',
+          onboarded: false,
+        },
+      });
+    }
     res.json({ user: req.user });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -22,13 +22,22 @@ export default function Dashboard() {
   const [showLogger, setShowLogger] = useState(false);
   const [activeBurnTimer, setActiveBurnTimer] = useState(null);
 
-  const { data: user } = useQuery({ queryKey: ['user'], queryFn: getMe });
-  const { data: log } = useQuery({ queryKey: ['today-log'], queryFn: getTodayLog, refetchInterval: 30000 });
+  const { data: user, isLoading: isUserLoading, isError: isUserError } = useQuery({
+    queryKey: ['user'],
+    queryFn: getMe,
+    retry: 1,
+  });
+  const { data: log } = useQuery({
+    queryKey: ['today-log'],
+    queryFn: getTodayLog,
+    refetchInterval: 30000,
+    enabled: !!user?.onboarded,
+  });
   const todayKey = DAY_MAP[new Date().getDay()];
   const { data: todayWorkout } = useQuery({
     queryKey: ['today-workout', todayKey],
     queryFn: () => getWorkoutToday(todayKey),
-    enabled: !!user,
+    enabled: !!user?.onboarded,
   });
 
   const weightMutation = useMutation({
@@ -68,7 +77,7 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [activeBurnTimer, log, burnMutation, beep]);
 
-  if (!user) {
+  if (isUserLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -76,7 +85,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!user.onboarded) {
+  if (isUserError || !user?.onboarded) {
     navigate('/onboarding', { replace: true });
     return null;
   }

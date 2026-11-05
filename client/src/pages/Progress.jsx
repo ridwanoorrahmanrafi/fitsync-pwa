@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { getProgress, getMe } from '../api/client.js';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
@@ -56,13 +57,28 @@ const tooltipStyle = {
 };
 
 export default function Progress() {
+  const navigate = useNavigate();
   const [range, setRange] = useState('30d');
 
-  const { data: logs = [], isLoading } = useQuery({
+  const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ['user'], queryFn: getMe });
+  const { data: logs = [], isLoading: isLogsLoading } = useQuery({
     queryKey: ['progress', range],
     queryFn: () => getProgress(range),
+    enabled: !!user?.onboarded,
   });
-  const { data: user } = useQuery({ queryKey: ['user'], queryFn: getMe });
+
+  if (isUserLoading || (user?.onboarded && isLogsLoading)) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user?.onboarded) {
+    navigate('/onboarding', { replace: true });
+    return null;
+  }
 
   const calorieData = logs.map((l) => ({ date: l.date.slice(5), kcal: l.totalCalories, target: user?.calorieTarget }));
   const weightData = logs.filter((l) => l.weightKg).map((l) => ({ date: l.date.slice(5), weight: l.weightKg }));

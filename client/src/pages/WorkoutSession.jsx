@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getWorkoutToday, completeWorkout } from '../api/client.js';
+import { getWorkoutToday, completeWorkout, getMe } from '../api/client.js';
 import LottiePlayer from '../components/workout/LottiePlayer.jsx';
 import RingTimer from '../components/workout/RingTimer.jsx';
 import { useWakeLock } from '../hooks/useWakeLock.js';
@@ -18,9 +18,11 @@ export default function WorkoutSession() {
   const queryClient = useQueryClient();
   const todayKey = DAY_MAP[new Date().getDay()];
 
-  const { data: todayDay, isLoading } = useQuery({
+  const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ['user'], queryFn: getMe });
+  const { data: todayDay, isLoading: isWorkoutLoading } = useQuery({
     queryKey: ['today-workout', todayKey],
     queryFn: () => getWorkoutToday(todayKey),
+    enabled: !!user?.onboarded,
   });
 
   const {
@@ -76,12 +78,17 @@ export default function WorkoutSession() {
     }
   }, [phase]);
 
-  if (isLoading) {
+  if (isUserLoading || (user?.onboarded && isWorkoutLoading)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  if (!user?.onboarded) {
+    navigate('/onboarding', { replace: true });
+    return null;
   }
 
   if (!todayDay || !todayDay.exercises || todayDay.exercises.length === 0) {

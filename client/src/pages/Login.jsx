@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { Zap, ShieldCheck, Dumbbell, Sparkles, Flame } from 'lucide-react';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, loginAsDemo } = useAuth();
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -97,6 +97,14 @@ export default function Login() {
               />
             </svg>
             Continue with Google
+          </button>
+
+          <button
+            onClick={loginAsDemo}
+            className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2"
+          >
+            <Zap size={14} className="text-amber-400 fill-amber-400" />
+            Continue as Demo Athlete (Alex Rivera)
           </button>
 
           <p className="text-[11px] text-slate-500 leading-relaxed max-w-xs">

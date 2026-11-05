@@ -21,6 +21,7 @@ api.interceptors.request.use(async (config) => {
 
 // Convenience wrappers
 export const getMe = () => api.get('/users/me').then((r) => r.data.user);
+export const deleteAccount = () => api.delete('/users/me').then((r) => r.data);
 export const onboard = (data) => api.post('/users/onboard', data).then((r) => r.data.user);
 export const getWorkoutPlan = () => api.get('/workouts/plan').then((r) => r.data.plan);
 export const getWorkoutToday = (day) => api.get(`/workouts/today?day=${day}`).then((r) => r.data.day);

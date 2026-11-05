@@ -153,12 +153,6 @@ export default function Progress() {
         </div>
       </div>
 
-      {isLoading && (
-        <div className="flex justify-center py-10">
-          <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-
       {/* Row 1 Charts: Side-by-Side Responsive Grid on Large Screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Calorie Trend Chart */}

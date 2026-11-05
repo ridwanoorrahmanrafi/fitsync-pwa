@@ -1,12 +1,19 @@
 {
   "name": "fitsync",
   "private": true,
-  "workspaces": ["server", "client"],
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
     "dev:server": "npm run dev --workspace=server",
     "dev:client": "npm run dev --workspace=client",
     "seed": "npm run seed --workspace=server",
-    "test": "npm test --workspace=server"
+    "test": "npm test --workspace=server",
+    "test:e2e": "npx playwright test",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
   }
 }
-

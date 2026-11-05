@@ -17,6 +17,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (localStorage.getItem('fitsync_dev_auth') === 'true') {
+      setUser(DEV_USER);
+      setLoading(false);
+      return;
+    }
+
     if (!firebaseConfigured || !auth) {
       setUser(DEV_USER);
       setLoading(false);
@@ -30,9 +36,14 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
+  const loginAsDemo = () => {
+    localStorage.setItem('fitsync_dev_auth', 'true');
+    setUser(DEV_USER);
+  };
+
   const login = async () => {
     if (!firebaseConfigured || !auth) {
-      setUser(DEV_USER);
+      loginAsDemo();
       return;
     }
 
@@ -43,21 +54,23 @@ export function AuthProvider({ children }) {
       console.warn('[Auth] Google sign-in cancelled or failed:', err.message);
       // In local dev, allow falling back to dev athlete if user cancels popup
       if (import.meta.env.DEV) {
-        setUser(DEV_USER);
+        loginAsDemo();
       }
     }
   };
 
   const logout = async () => {
+    localStorage.removeItem('fitsync_dev_auth');
     if (!firebaseConfigured || !auth) {
       setUser(null);
       return;
     }
     await signOut(auth);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isFirebaseConfigured: firebaseConfigured }}>
+    <AuthContext.Provider value={{ user, loading, login, loginAsDemo, logout, isFirebaseConfigured: firebaseConfigured }}>
       {children}
     </AuthContext.Provider>
   );
